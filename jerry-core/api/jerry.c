@@ -2423,7 +2423,6 @@ jerry_invoke_function (bool is_invoke_as_constructor, /**< true - invoke functio
       return jerry_throw (ecma_raise_type_error (ECMA_ERR_MSG (error_value_msg_p)));
     }
   }
-
   if (is_invoke_as_constructor)
   {
     JERRY_ASSERT (jerry_value_is_constructor (func_obj_val));

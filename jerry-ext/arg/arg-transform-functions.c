@@ -51,6 +51,7 @@ static jerry_value_t
 jerryx_arg_transform_number_strict_common (jerryx_arg_js_iterator_t *js_arg_iter_p, /**< available JS args */
                                            double *number_p) /**< [out] the number in JS arg */
 {
+  printf("number\n");
   jerry_value_t js_arg = jerryx_arg_js_iterator_pop (js_arg_iter_p);
 
   if (!jerry_value_is_number (js_arg))
@@ -75,6 +76,7 @@ static jerry_value_t
 jerryx_arg_transform_number_common (jerryx_arg_js_iterator_t *js_arg_iter_p, /**< available JS args */
                                     double *number_p) /**< [out] the number in JS arg */
 {
+  printf("common\n");
   jerry_value_t js_arg = jerryx_arg_js_iterator_pop (js_arg_iter_p);
 
   jerry_value_t to_number = jerry_value_to_number (js_arg);
@@ -132,6 +134,7 @@ jerryx_arg_helper_process_double (double *d, /**< [in, out] the number to be pro
                                   double max, /**< the max value for clamping */
                                   jerryx_arg_int_option_t option) /**< the converting policies */
 {
+  printf("double\n");
   if (isnan (*d))
   {
     return jerry_create_error (JERRY_ERROR_TYPE,
@@ -219,6 +222,7 @@ jerry_value_t
 jerryx_arg_transform_boolean_strict (jerryx_arg_js_iterator_t *js_arg_iter_p, /**< available JS args */
                                      const jerryx_arg_t *c_arg_p) /**< the native arg */
 {
+  printf("bool\n");
   jerry_value_t js_arg = jerryx_arg_js_iterator_pop (js_arg_iter_p);
 
   if (!jerry_value_is_boolean (js_arg))
@@ -243,6 +247,7 @@ jerry_value_t
 jerryx_arg_transform_boolean (jerryx_arg_js_iterator_t *js_arg_iter_p, /**< available JS args */
                               const jerryx_arg_t *c_arg_p) /**< the native arg */
 {
+  printf("bool\n");
   jerry_value_t js_arg = jerryx_arg_js_iterator_pop (js_arg_iter_p);
 
   bool to_boolean = jerry_value_to_boolean (js_arg);
@@ -446,6 +451,7 @@ jerry_value_t
 jerryx_arg_transform_native_pointer (jerryx_arg_js_iterator_t *js_arg_iter_p, /**< available JS args */
                                      const jerryx_arg_t *c_arg_p) /**< the native arg */
 {
+  printf("native\n");
   jerry_value_t js_arg = jerryx_arg_js_iterator_pop (js_arg_iter_p);
 
   if (!jerry_value_is_object (js_arg))

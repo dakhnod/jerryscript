@@ -53,6 +53,7 @@ ecma_value_t
 ecma_builtin_type_error_dispatch_call (const ecma_value_t *arguments_list_p, /**< arguments list */
                                        ecma_length_t arguments_list_len) /**< number of arguments */
 {
+  printf("erro dispatch");
   return ecma_builtin_helper_error_dispatch_call (ECMA_ERROR_TYPE, arguments_list_p, arguments_list_len);
 } /* ecma_builtin_type_error_dispatch_call */
 

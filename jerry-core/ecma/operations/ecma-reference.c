@@ -110,6 +110,7 @@ ecma_op_resolve_reference_value (ecma_object_t *lex_env_p, /**< starting lexical
 
     if (lex_env_type == ECMA_LEXICAL_ENVIRONMENT_DECLARATIVE)
     {
+      printf("declarative\n");
       ecma_property_t *property_p = ecma_find_named_property (lex_env_p, name_p);
 
       if (property_p != NULL)
@@ -119,6 +120,7 @@ ecma_op_resolve_reference_value (ecma_object_t *lex_env_p, /**< starting lexical
     }
     else if (lex_env_type == ECMA_LEXICAL_ENVIRONMENT_THIS_OBJECT_BOUND)
     {
+      printf("this bound\n");
       ecma_object_t *binding_obj_p = ecma_get_lex_env_binding_object (lex_env_p);
 
 #if ENABLED (JERRY_LCACHE)
@@ -130,6 +132,7 @@ ecma_op_resolve_reference_value (ecma_object_t *lex_env_p, /**< starting lexical
 
         if (ECMA_PROPERTY_GET_TYPE (*property_p) == ECMA_PROPERTY_TYPE_NAMEDDATA)
         {
+          printf("return  \n");
           return ecma_fast_copy_value (prop_value_p->value);
         }
 

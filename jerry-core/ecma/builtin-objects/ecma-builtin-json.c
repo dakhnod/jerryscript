@@ -1229,6 +1229,13 @@ ecma_builtin_json_serialize_property (ecma_json_stringify_context_t *context_p, 
   }
 
   /* 10. */
+  if (jerry_value_is_function (value))
+  {
+    ecma_stringbuilder_append_magic (&context_p->result_builder, LIT_MAGIC_STRING_FUNCTION);
+    return ECMA_VALUE_EMPTY;
+  }
+
+  /* 10. */
   if (ecma_is_value_number (value))
   {
     ecma_number_t num_value = ecma_get_number_from_value (value);

@@ -19,6 +19,7 @@
 #include "ecma-globals.h"
 #include "jrt.h"
 #include "vm-defines.h"
+#include "byte-code.h"
 
 /** \addtogroup vm Virtual machine
  * @{

@@ -405,6 +405,7 @@ ecma_raise_syntax_error (const char *msg_p) /**< error message */
 ecma_value_t
 ecma_raise_type_error (const char *msg_p) /**< error message */
 {
+  printf("raise type error %s\n", msg_p);
   return ecma_raise_standard_error (ECMA_ERROR_TYPE, (const lit_utf8_byte_t *) msg_p);
 } /* ecma_raise_type_error */
 

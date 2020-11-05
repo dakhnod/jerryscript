@@ -165,7 +165,6 @@ vm_op_set_value (ecma_value_t object, /**< base object */
 #if ENABLED (JERRY_ERROR_MESSAGES)
       ecma_free_value (to_object);
       ecma_free_value (JERRY_CONTEXT (error_value));
-
       ecma_value_t error_value = ecma_raise_standard_error_with_format (ECMA_ERROR_TYPE,
                                                                         "Cannot set property '%' of %",
                                                                         property,
@@ -569,6 +568,25 @@ opfunc_call (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
   ecma_value_t this_value = is_call_prop ? stack_top_p[-3] : ECMA_VALUE_UNDEFINED;
   ecma_value_t func_value = stack_top_p[-1];
   ecma_value_t completion_value;
+  
+  printf("param count: %i\n", arguments_list_len);
+  for(uint32_t i = 0; i < arguments_list_len; i++){
+      printf("arg: %08X %i\n", stack_top_p[i], stack_top_p[i] & ECMA_VALUE_TYPE_MASK);
+      ecma_object_t *obj_p = ecma_get_object_from_value (this_value);
+      printf("object type: %i\n", ecma_get_object_type (obj_p));
+  }
+  
+  uint32_t type = func_value & ECMA_VALUE_TYPE_MASK;
+  if(type == ECMA_TYPE_OBJECT){
+    ecma_object_t *func_obj = ecma_get_object_from_value (func_value);
+    printf("func obj type: %i\n", ecma_get_object_type(func_obj));
+  }else{
+    printf("func: %i\n", type);  
+  }
+  
+  ecma_object_t *obj_p = ecma_get_object_from_value (this_value);
+  
+  printf("this: %i\n", ecma_get_object_type (obj_p));
 
   if (!ecma_op_is_callable (func_value))
   {
@@ -661,7 +679,6 @@ opfunc_construct (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
   else
   {
     ecma_object_t *constructor_obj_p = ecma_get_object_from_value (constructor_value);
-
     completion_value = ecma_op_function_construct (constructor_obj_p,
                                                    ECMA_VALUE_UNDEFINED,
                                                    stack_top_p,
@@ -726,10 +743,23 @@ opfunc_construct (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
       { \
         /* Note: There should be no specialization for arguments. */ \
         (target_value) = ecma_fast_copy_value (frame_ctx_p->registers_p[literal_index]); \
+        if((target_value & ECMA_VALUE_TYPE_MASK) == ECMA_TYPE_STRING){ \
+          ecma_string_t *name_p = ecma_get_string_from_value (target_value); \
+          lit_utf8_size_t size_p, length_p; \
+          lit_utf8_byte_t buf[256]; \
+          uint8_t flags; \
+          const lit_utf8_byte_t *str = ecma_string_get_chars(name_p, &size_p, &length_p, buf, &flags); \
+          printf("name: %s\n", str); \
+        } \
       } \
       else \
       { \
         ecma_string_t *name_p = ecma_get_string_from_value (literal_start_p[literal_index]); \
+        lit_utf8_size_t size_p, length_p; \
+        lit_utf8_byte_t buf[256]; \
+        uint8_t flags; \
+        const lit_utf8_byte_t *str = ecma_string_get_chars(name_p, &size_p, &length_p, buf, &flags); \
+        printf("name: %s\n", str); \
         \
         result = ecma_op_resolve_reference_value (frame_ctx_p->lex_env_p, \
                                                   name_p); \
@@ -743,13 +773,30 @@ opfunc_construct (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
     } \
     else if (literal_index < const_literal_end) \
     { \
+      printf("index < const_literal_end\n"); \
       (target_value) = ecma_fast_copy_value (literal_start_p[literal_index]); \
+      if((target_value & ECMA_VALUE_TYPE_MASK) == ECMA_TYPE_STRING){ \
+        ecma_string_t *name_p = ecma_get_string_from_value (target_value); \
+        lit_utf8_size_t size_p, length_p; \
+        lit_utf8_byte_t buf[256]; \
+        uint8_t flags; \
+        const lit_utf8_byte_t *str = ecma_string_get_chars(name_p, &size_p, &length_p, buf, &flags); \
+        printf("value: %s\n", str); \
+      } \
     } \
     else \
     { \
       /* Object construction. */ \
       (target_value) = vm_construct_literal_object (frame_ctx_p, \
                                                     literal_start_p[literal_index]); \
+      if((target_value & ECMA_VALUE_TYPE_MASK) == ECMA_TYPE_STRING){ \
+        ecma_string_t *name_p = ecma_get_string_from_value (target_value); \
+        lit_utf8_size_t size_p, length_p; \
+        lit_utf8_byte_t buf[256]; \
+        uint8_t flags; \
+        const lit_utf8_byte_t *str = ecma_string_get_chars(name_p, &size_p, &length_p, buf, &flags); \
+        printf("value: %s\n", str); \
+      } \
     } \
   } \
   while (0)
@@ -971,6 +1018,9 @@ vm_loop (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
       {
         opcode = *byte_code_p++;
         opcode_data = (uint32_t) ((CBC_END + 1) + opcode);
+        printf("opcode %s\n", cbc_ext_names[opcode]);
+      }else{
+        printf("opcode %s\n", cbc_names[opcode]);
       }
 
       opcode_data = vm_decode_table[opcode_data];
@@ -984,6 +1034,7 @@ vm_loop (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
       {
         uint16_t literal_index;
         READ_LITERAL_INDEX (literal_index);
+        printf("literal index: %i\n", literal_index);
         READ_LITERAL (literal_index, left_value);
 
         if (operands != VM_OC_GET_LITERAL)
@@ -992,13 +1043,16 @@ vm_loop (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
           {
             case VM_OC_GET_LITERAL_LITERAL:
             {
+              printf("literal literal\n");
               uint16_t second_literal_index;
               READ_LITERAL_INDEX (second_literal_index);
               READ_LITERAL (second_literal_index, right_value);
+              
               break;
             }
             case VM_OC_GET_STACK_LITERAL:
             {
+              printf("stack literal\n");
               JERRY_ASSERT (stack_top_p > frame_ctx_p->registers_p + register_end);
               right_value = left_value;
               left_value = *(--stack_top_p);
@@ -1006,6 +1060,7 @@ vm_loop (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
             }
             default:
             {
+              printf("this literal\n");
               JERRY_ASSERT (operands == VM_OC_GET_THIS_LITERAL);
 
               right_value = left_value;
@@ -1017,6 +1072,7 @@ vm_loop (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
       }
       else if (operands >= VM_OC_GET_STACK)
       {
+        printf("get stack\n");
         JERRY_ASSERT (operands == VM_OC_GET_STACK
                       || operands == VM_OC_GET_STACK_STACK);
 
@@ -1032,6 +1088,7 @@ vm_loop (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
       }
       else if (operands == VM_OC_GET_BRANCH)
       {
+        printf("get branch\n");
         branch_offset_length = CBC_BRANCH_OFFSET_LENGTH (opcode);
         JERRY_ASSERT (branch_offset_length >= 1 && branch_offset_length <= 3);
 
@@ -1084,9 +1141,18 @@ vm_loop (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
           branch_offset = -branch_offset;
         }
       }
+      
+      // printf("data: %i\n", opcode_data);
+      // printf("enum: %i %i\n", VM_OC_GROUP_GET_INDEX (opcode_data), VM_OC_ERROR);
+      // CBC_SET_BYTECODE_PTR
+      
+      // uint32_t group = VM_OC_GROUP_GET_INDEX (opcode_data);
+      
+      // printf("oc group: %i %i\n", group, VM_OC_RET);
 
       switch (VM_OC_GROUP_GET_INDEX (opcode_data))
       {
+
         case VM_OC_POP:
         {
           JERRY_ASSERT (stack_top_p > frame_ctx_p->registers_p + register_end);
@@ -2059,6 +2125,7 @@ vm_loop (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
           frame_ctx_p->call_operation = VM_EXEC_CONSTRUCT;
           frame_ctx_p->byte_code_p = byte_code_start_p;
           frame_ctx_p->stack_top_p = stack_top_p;
+          // ecma_object_t *obj = ecma_get_object_from_value(*stack_top_p);
           return ECMA_VALUE_UNDEFINED;
         }
         case VM_OC_ERROR:

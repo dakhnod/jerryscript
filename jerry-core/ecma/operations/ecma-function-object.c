@@ -102,9 +102,11 @@ ecma_is_constructor (ecma_value_t value) /**< ecma value */
 
   if (ecma_get_object_type (obj_p) == ECMA_OBJECT_TYPE_FUNCTION)
   {
+    printf("function\n");
     return (!ecma_get_object_is_builtin (obj_p)
             || !ecma_builtin_function_is_routine (obj_p));
   }
+  printf("not function\n");
 
   return (ecma_get_object_type (obj_p) == ECMA_OBJECT_TYPE_BOUND_FUNCTION
           || ecma_get_object_type (obj_p) == ECMA_OBJECT_TYPE_EXTERNAL_FUNCTION);
@@ -725,7 +727,6 @@ ecma_op_function_call (ecma_object_t *func_obj_p, /**< Function object */
       if (JERRY_UNLIKELY (ecma_get_object_is_builtin (func_obj_p)))
       {
         JERRY_ASSERT (!ecma_op_function_has_construct_flag (arguments_list_p));
-
         ecma_value_t ret_value = ecma_builtin_dispatch_call (func_obj_p,
                                                              this_arg_value,
                                                              arguments_list_p,
